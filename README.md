@@ -28,7 +28,13 @@ This project is a Rust web application using Warp for the web server and JWT (JS
    MONGO_INITDB_ROOT_PASSWORD=secret1
    ```
 
-   Replace `your_jwt_secret_here`, `mongoadmin`, and `secret` with your own values.
+   Replace `your_jwt_secret_here`, `mongoadmin`, and `secret` with your own values. 
+
+   You can generate a secure JWT secret using various tools. For instance, in Unix/Linux, you can use:
+
+   ```bash
+   openssl rand -base64 128
+   ```
 
 3. **Start MongoDB with Docker Compose**
 
