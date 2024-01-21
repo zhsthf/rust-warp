@@ -1,7 +1,6 @@
-use bcrypt::{hash, verify, DEFAULT_COST};
-use std::convert::Infallible;
-
 use auth::{create_jwt, with_auth, Role};
+use bcrypt::{hash, verify, DEFAULT_COST};
+use dotenv::dotenv;
 use error::Error::*;
 use mongodb::{
     bson::{doc, uuid},
@@ -9,6 +8,8 @@ use mongodb::{
     Client, Collection,
 };
 use serde::{Deserialize, Serialize};
+use std::convert::Infallible;
+use std::env;
 use warp::{http::StatusCode, reject, reply, Filter, Rejection, Reply};
 
 mod auth;
@@ -78,10 +79,18 @@ async fn main() {
     warp::serve(routes).run(([0, 0, 0, 0], 8000)).await;
 }
 
-async fn connect_to_mongo() -> mongodb::error::Result<MongoDbClient> {
-    let mut client_options =
-        ClientOptions::parse("mongodb://mongoadmin:secret@localhost:27017").await?;
+pub async fn connect_to_mongo() -> mongodb::error::Result<MongoDbClient> {
+    dotenv().ok();
+
+    let username =
+        env::var("MONGO_INITDB_ROOT_USERNAME").expect("MONGO_INITDB_ROOT_USERNAME must be set");
+    let password =
+        env::var("MONGO_INITDB_ROOT_PASSWORD").expect("MONGO_INITDB_ROOT_PASSWORD must be set");
+    let mongo_uri = format!("mongodb://{}:{}@localhost:27017", username, password);
+
+    let mut client_options = ClientOptions::parse(&mongo_uri).await?;
     client_options.app_name = Some("MyApp".to_string());
+
     Client::with_options(client_options)
 }
 
